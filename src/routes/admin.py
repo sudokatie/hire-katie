@@ -84,6 +84,10 @@ def _project_to_dict(project: Project) -> dict:
         "repo_url": project.repo_url,
         "description": project.description,
         "tech_stack": project.tech_stack,
+        "access_method": project.access_method,
+        "coding_standards": project.coding_standards,
+        "do_not_touch": project.do_not_touch,
+        "communication_preference": project.communication_preference,
         "status": project.status.value,
         "created_at": project.created_at.isoformat() if project.created_at else None,
         "updated_at": project.updated_at.isoformat() if project.updated_at else None
@@ -264,6 +268,55 @@ async def log_session_endpoint(
         return {"session": parse_session_json(session)}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/api/admin/communications")
+async def list_communications_endpoint(
+    client_id: Optional[int] = None,
+    direction: Optional[str] = None,
+    page: int = 1,
+    limit: int = 20,
+    _: str = Depends(verify_session)
+):
+    """List communications with pagination."""
+    from ..models.communication import Communication, CommunicationDirection
+    
+    with get_db_session() as session:
+        query = session.query(Communication)
+        
+        if client_id is not None:
+            query = query.filter_by(client_id=client_id)
+        if direction is not None:
+            query = query.filter_by(direction=CommunicationDirection(direction))
+        
+        total = query.count()
+        
+        communications = (
+            query
+            .order_by(Communication.created_at.desc())
+            .offset((page - 1) * limit)
+            .limit(limit)
+            .all()
+        )
+        
+        result = []
+        for comm in communications:
+            result.append({
+                "id": comm.id,
+                "client_id": comm.client_id,
+                "direction": comm.direction.value,
+                "subject": comm.subject,
+                "content": comm.content,
+                "message_id": comm.message_id,
+                "created_at": comm.created_at.isoformat() if comm.created_at else None
+            })
+        
+        return {
+            "communications": result,
+            "total": total,
+            "page": page,
+            "limit": limit
+        }
 
 
 @router.get("/api/admin/stats")

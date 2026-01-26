@@ -20,6 +20,7 @@ class IntakeData:
     access_method: Optional[str] = None
     coding_standards: Optional[str] = None
     do_not_touch: Optional[str] = None
+    communication_preference: Optional[str] = None
 
 
 def create_project(client_id: int, data: IntakeData) -> Project:
@@ -49,6 +50,7 @@ def create_project(client_id: int, data: IntakeData) -> Project:
             access_method=data.access_method,
             coding_standards=data.coding_standards,
             do_not_touch=data.do_not_touch,
+            communication_preference=data.communication_preference,
             status=ProjectStatus.INTAKE
         )
         session.add(project)
@@ -91,6 +93,7 @@ def create_project_from_intake(email: str, data: IntakeData) -> Optional[Project
             access_method=data.access_method,
             coding_standards=data.coding_standards,
             do_not_touch=data.do_not_touch,
+            communication_preference=data.communication_preference,
             status=ProjectStatus.INTAKE
         )
         session.add(project)

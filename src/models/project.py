@@ -30,6 +30,7 @@ class Project(Base, TimestampMixin):
     access_method = Column(String(100))
     coding_standards = Column(Text)
     do_not_touch = Column(Text)
+    communication_preference = Column(String(50))
     status = Column(
         Enum(ProjectStatus),
         nullable=False,

@@ -77,6 +77,16 @@
                 <textarea id="do_not_touch" name="do_not_touch" placeholder="Files, directories, or areas to avoid..."></textarea>
             </div>
 
+            <div class="form-group">
+                <label for="communication_preference">COMMUNICATION PREFERENCE</label>
+                <select id="communication_preference" name="communication_preference">
+                    <option value="">Select...</option>
+                    <option value="only_questions">Only when I have questions</option>
+                    <option value="daily_updates">Brief daily updates</option>
+                    <option value="weekly_summary">Weekly summary</option>
+                </select>
+            </div>
+
             <button type="submit" class="btn">SUBMIT PROJECT</button>
         </form>
 
@@ -106,7 +116,8 @@
                 tech_stack: formData.get('tech_stack') || null,
                 access_method: formData.get('access_method') || null,
                 coding_standards: formData.get('coding_standards') || null,
-                do_not_touch: formData.get('do_not_touch') || null
+                do_not_touch: formData.get('do_not_touch') || null,
+                communication_preference: formData.get('communication_preference') || null
             };
 
             try {

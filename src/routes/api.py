@@ -29,6 +29,7 @@ class IntakeRequest(BaseModel):
     access_method: Optional[str] = None
     coding_standards: Optional[str] = None
     do_not_touch: Optional[str] = None
+    communication_preference: Optional[str] = None
 
 
 class IntakeResponse(BaseModel):
@@ -78,7 +79,8 @@ async def submit_intake(data: IntakeRequest):
         tech_stack=data.tech_stack,
         access_method=data.access_method,
         coding_standards=data.coding_standards,
-        do_not_touch=data.do_not_touch
+        do_not_touch=data.do_not_touch,
+        communication_preference=data.communication_preference
     )
     
     project = create_project(client.id, intake_data)
