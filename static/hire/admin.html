@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Hire Katie</title>
+    <link rel="stylesheet" href="/hire/css/hire.css">
+</head>
+<body>
+    <div class="container-wide">
+        <!-- Login Form -->
+        <div id="login-section" class="login-box">
+            <h1>ADMIN LOGIN</h1>
+            <div id="login-error" class="message error hidden"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="password">PASSWORD</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn">LOGIN</button>
+            </form>
+        </div>
+
+        <!-- Dashboard (hidden until logged in) -->
+        <div id="dashboard-section" class="hidden">
+            <header>
+                <nav>
+                    <a href="/hire/">HOME</a>
+                    <span style="margin-left: auto;"><a href="#" id="logout-btn">LOGOUT</a></span>
+                </nav>
+            </header>
+
+            <h1>ADMIN DASHBOARD</h1>
+
+            <!-- Stats -->
+            <div class="stats" id="stats">
+                <div class="stat">
+                    <div class="stat-value" id="stat-clients">-</div>
+                    <div class="stat-label">ACTIVE CLIENTS</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-projects">-</div>
+                    <div class="stat-label">ACTIVE PROJECTS</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-pending">-</div>
+                    <div class="stat-label">PENDING REVIEW</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="clients">CLIENTS</div>
+                <div class="tab" data-tab="projects">PROJECTS</div>
+                <div class="tab" data-tab="log-session">LOG SESSION</div>
+            </div>
+
+            <!-- Clients Tab -->
+            <div id="clients-tab" class="tab-content active">
+                <h2>CLIENTS</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>EMAIL</th>
+                            <th>NAME</th>
+                            <th>STATUS</th>
+                            <th>CREATED</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clients-table"></tbody>
+                </table>
+            </div>
+
+            <!-- Projects Tab -->
+            <div id="projects-tab" class="tab-content">
+                <h2>PROJECTS</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NAME</th>
+                            <th>CLIENT</th>
+                            <th>STATUS</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projects-table"></tbody>
+                </table>
+            </div>
+
+            <!-- Log Session Tab -->
+            <div id="log-session-tab" class="tab-content">
+                <h2>LOG WORK SESSION</h2>
+                <div id="session-message" class="message hidden"></div>
+                <form id="session-form">
+                    <div class="form-group">
+                        <label for="session-project" class="required">PROJECT</label>
+                        <select id="session-project" name="project_id" required>
+                            <option value="">Select project...</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="session-date" class="required">DATE</label>
+                            <input type="date" id="session-date" name="session_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="session-hours" class="required">HOURS</label>
+                            <input type="number" id="session-hours" name="hours" step="0.5" min="0.5" max="8" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="session-tasks">TASKS COMPLETED (one per line)</label>
+                        <textarea id="session-tasks" name="tasks_completed" placeholder="Fixed login bug&#10;Added user dashboard&#10;Wrote tests for API"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="session-prs">PRS OPENED (one per line)</label>
+                        <textarea id="session-prs" name="prs_opened" placeholder="https://github.com/user/repo/pull/1"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="session-notes">NOTES</label>
+                        <textarea id="session-notes" name="notes"></textarea>
+                    </div>
+                    <button type="submit" class="btn">LOG SESSION</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let clients = [];
+        let projects = [];
+
+        // Elements
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Check if already logged in
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/stats');
+                if (res.ok) {
+                    showDashboard();
+                    loadData();
+                }
+            } catch (e) {}
+        }
+
+        // Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                if (res.ok) {
+                    showDashboard();
+                    loadData();
+                } else {
+                    loginError.textContent = 'Invalid password';
+                    loginError.classList.remove('hidden');
+                }
+            } catch (e) {
+                loginError.textContent = 'Error connecting to server';
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/api/admin/logout', { method: 'POST' });
+            location.reload();
+        });
+
+        function showDashboard() {
+            loginSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+        }
+
+        // Load data
+        async function loadData() {
+            await Promise.all([loadStats(), loadClients(), loadProjects()]);
+        }
+
+        async function loadStats() {
+            const res = await fetch('/api/admin/stats');
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('stat-clients').textContent = data.clients.active;
+                document.getElementById('stat-projects').textContent = data.projects.active;
+                document.getElementById('stat-pending').textContent = data.projects.pending_review;
+            }
+        }
+
+        async function loadClients() {
+            const res = await fetch('/api/admin/clients?limit=100');
+            if (res.ok) {
+                const data = await res.json();
+                clients = data.clients;
+                renderClients();
+            }
+        }
+
+        async function loadProjects() {
+            const res = await fetch('/api/admin/projects?limit=100');
+            if (res.ok) {
+                const data = await res.json();
+                projects = data.projects;
+                renderProjects();
+                populateProjectSelect();
+            }
+        }
+
+        function renderClients() {
+            const tbody = document.getElementById('clients-table');
+            tbody.innerHTML = clients.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.email}</td>
+                    <td>${c.name || '-'}</td>
+                    <td><span class="badge badge-${c.status}">${c.status.toUpperCase()}</span></td>
+                    <td>${c.created_at ? new Date(c.created_at).toLocaleDateString() : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderProjects() {
+            const tbody = document.getElementById('projects-table');
+            tbody.innerHTML = projects.map(p => {
+                const client = clients.find(c => c.id === p.client_id);
+                const actions = p.status === 'intake' ? `
+                    <button class="btn btn-success" onclick="approveProject(${p.id})" style="padding:4px 8px;font-size:11px;">APPROVE</button>
+                    <button class="btn btn-danger" onclick="rejectProject(${p.id})" style="padding:4px 8px;font-size:11px;">REJECT</button>
+                ` : '-';
+                return `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td>${p.name}</td>
+                        <td>${client ? client.email : p.client_id}</td>
+                        <td><span class="badge badge-${p.status === 'intake' ? 'pending' : p.status}">${p.status.toUpperCase()}</span></td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function populateProjectSelect() {
+            const select = document.getElementById('session-project');
+            const activeProjects = projects.filter(p => p.status === 'active');
+            select.innerHTML = '<option value="">Select project...</option>' + 
+                activeProjects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+
+        // Project actions
+        async function approveProject(id) {
+            if (!confirm('Approve this project?')) return;
+            const res = await fetch(`/api/admin/projects/${id}/approve`, { method: 'POST' });
+            if (res.ok) {
+                loadProjects();
+                loadStats();
+            }
+        }
+
+        async function rejectProject(id) {
+            const reason = prompt('Rejection reason:');
+            if (!reason) return;
+            const res = await fetch(`/api/admin/projects/${id}/reject`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+            if (res.ok) {
+                loadProjects();
+                loadStats();
+            }
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // Session form
+        const sessionForm = document.getElementById('session-form');
+        const sessionMessage = document.getElementById('session-message');
+
+        // Set default date to today
+        document.getElementById('session-date').valueAsDate = new Date();
+
+        sessionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(sessionForm);
+            const tasks = formData.get('tasks_completed').split('\n').filter(t => t.trim());
+            const prs = formData.get('prs_opened').split('\n').filter(p => p.trim());
+            
+            const data = {
+                project_id: parseInt(formData.get('project_id')),
+                session_date: formData.get('session_date'),
+                hours: parseFloat(formData.get('hours')),
+                tasks_completed: tasks,
+                prs_opened: prs,
+                notes: formData.get('notes') || null
+            };
+
+            const res = await fetch('/api/admin/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            sessionMessage.classList.remove('hidden', 'success', 'error');
+            if (res.ok) {
+                sessionMessage.textContent = 'Session logged successfully';
+                sessionMessage.classList.add('success');
+                sessionForm.reset();
+                document.getElementById('session-date').valueAsDate = new Date();
+            } else {
+                const err = await res.json();
+                sessionMessage.textContent = err.detail || 'Error logging session';
+                sessionMessage.classList.add('error');
+            }
+        });
+
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>

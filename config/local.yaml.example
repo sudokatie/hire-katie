@@ -1,0 +1,9 @@
+# Copy this file to local.yaml and fill in your values.
+# local.yaml is gitignored and should never be committed.
+
+stripe:
+  price_id: "price_xxx"
+
+# Uncomment for production database path:
+# database:
+#   url: "sqlite:////var/lib/hire-katie/hire_katie.db"

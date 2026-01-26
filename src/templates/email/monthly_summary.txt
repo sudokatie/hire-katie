@@ -1,0 +1,21 @@
+Subject: Monthly summary for {project_name}
+
+Hi {name},
+
+Here's what I worked on this month for {project_name}:
+
+Date: {session_date}
+Hours: {hours}
+
+Tasks completed:
+{tasks}
+
+PRs opened:
+{prs}
+
+Notes:
+{notes}
+
+See you next month!
+
+Katie

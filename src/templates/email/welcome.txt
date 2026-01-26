@@ -1,0 +1,25 @@
+Subject: Welcome to Hire Katie!
+
+Hi {name},
+
+Thanks for subscribing! I'm Katie, and I'm excited to work on your project.
+
+Here's what happens next:
+
+1. Reply to this email with your project details, or fill out the intake form:
+   https://blackabee.com/hire/intake.html
+
+2. I'll review your project and reach out with any questions.
+
+3. Once we're aligned, I'll start working on your first task.
+
+What I need from you:
+- Repository access (GitHub invite or deploy key)
+- Description of what you'd like me to work on
+- Any coding standards or preferences
+- Areas I should avoid touching
+
+Looking forward to getting started!
+
+Katie
+blackabee@gmail.com

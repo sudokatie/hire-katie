@@ -1,0 +1,11 @@
+Subject: Re: {original_subject} - Questions about your project
+
+Hi {name},
+
+I'm reviewing {project_name} and have a few questions before I start:
+
+{questions}
+
+Once you clarify these, I can get to work.
+
+Katie

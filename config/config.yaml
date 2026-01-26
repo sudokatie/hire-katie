@@ -1,0 +1,14 @@
+server:
+  host: "0.0.0.0"
+  port: 8081
+
+database:
+  url: "sqlite:///data/hire_katie.db"
+
+stripe:
+  price_id: ""
+
+email:
+  from_address: "blackabee@gmail.com"
+  from_name: "Katie"
+  templates_dir: "src/templates/email"

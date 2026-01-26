@@ -1,0 +1,19 @@
+Subject: Project received: {project_name}
+
+Hi {name},
+
+I received your project submission for {project_name}.
+
+I'll review the details and reach out within a few days to:
+- Confirm I understand the scope
+- Ask any clarifying questions
+- Get repository access if needed
+
+If you haven't already, please make sure I can access your code. You can:
+- Invite katieblackabee as a GitHub collaborator
+- Add a deploy key (I'll send the public key)
+- Share access another way that works for you
+
+Talk soon!
+
+Katie
