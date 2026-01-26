@@ -102,3 +102,52 @@ class TestParseEnvelopeList:
         emails = parse_envelope_list(output)
         # Should only parse the actual email line
         assert len(emails) <= 1
+
+
+class TestCheckInbox:
+    def test_returns_emails(self, mock_subprocess):
+        mock_subprocess.return_value = MagicMock(
+            returncode=0,
+            stdout="*1  2024-01-26  test@example.com  Test Subject"
+        )
+        
+        from src.services.email_service import check_inbox
+        emails = check_inbox()
+        
+        mock_subprocess.assert_called_once()
+        # Verify himalaya was called with correct args
+        call_args = mock_subprocess.call_args[0][0]
+        assert 'himalaya' in call_args
+        assert 'envelope' in call_args
+        assert 'list' in call_args
+
+    def test_returns_empty_on_error(self, mock_subprocess):
+        mock_subprocess.return_value = MagicMock(returncode=1, stderr="Error")
+        
+        from src.services.email_service import check_inbox
+        emails = check_inbox()
+        
+        assert emails == []
+
+
+class TestArchiveEmail:
+    def test_archives_successfully(self, mock_subprocess):
+        mock_subprocess.return_value = MagicMock(returncode=0)
+        
+        from src.services.email_service import archive_email
+        result = archive_email("123")
+        
+        assert result is True
+        call_args = mock_subprocess.call_args[0][0]
+        assert 'himalaya' in call_args
+        assert 'move' in call_args
+        assert '[Gmail]/All Mail' in call_args
+        assert '123' in call_args
+
+    def test_returns_false_on_failure(self, mock_subprocess):
+        mock_subprocess.return_value = MagicMock(returncode=1, stderr="Error")
+        
+        from src.services.email_service import archive_email
+        result = archive_email("123")
+        
+        assert result is False
