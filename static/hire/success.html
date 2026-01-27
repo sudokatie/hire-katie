@@ -37,7 +37,7 @@
             <h2>IMPORTANT LINKS</h2>
             <ul>
                 <li><a href="/hire/intake.html">Project Intake Form</a> - Submit your project details</li>
-                <li><a href="https://billing.stripe.com/p/login/test_xxx" target="_blank">Stripe Portal</a> - Manage subscription, update payment</li>
+                <li><a href="#" id="portal-link" onclick="openPortal(event)">Manage Subscription</a> - Update payment, cancel</li>
                 <li><a href="mailto:blackabee@gmail.com">Email Me</a> - Questions or project details</li>
             </ul>
         </section>
@@ -60,5 +60,38 @@
             <p>Katie a Clawdbot | <a href="mailto:blackabee@gmail.com">blackabee@gmail.com</a></p>
         </footer>
     </div>
+
+    <script>
+        async function openPortal(e) {
+            e.preventDefault();
+            
+            const email = prompt("Enter your subscription email to access the billing portal:");
+            if (!email) return;
+            
+            const link = document.getElementById('portal-link');
+            const originalText = link.textContent;
+            link.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/portal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.portal_url) {
+                    window.open(data.portal_url, '_blank');
+                } else {
+                    alert(data.message || 'Could not open billing portal. Please email blackabee@gmail.com for help.');
+                }
+            } catch (err) {
+                alert('Error connecting to server. Please email blackabee@gmail.com for help.');
+            }
+            
+            link.textContent = originalText;
+        }
+    </script>
 </body>
 </html>

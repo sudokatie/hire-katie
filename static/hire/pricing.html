@@ -70,10 +70,12 @@
     </div>
 
     <script>
-        // Stripe configuration
-        // Replace with your publishable key
-        const STRIPE_PUBLISHABLE_KEY = 'pk_test_your_key_here';
-        const STRIPE_PRICE_ID = 'price_your_price_id_here';
+        // Stripe configuration - MUST BE SET BEFORE DEPLOYMENT
+        // Get these from your Stripe dashboard:
+        // - Publishable key: Dashboard > Developers > API keys
+        // - Price ID: Dashboard > Products > Your product > Pricing > Copy ID
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_REPLACE_WITH_YOUR_KEY';
+        const STRIPE_PRICE_ID = 'price_REPLACE_WITH_YOUR_PRICE_ID';
         
         const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
         

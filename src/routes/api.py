@@ -119,3 +119,54 @@ async def check_status(email: str):
         active=client.status == ClientStatus.ACTIVE,
         projects_count=len(projects)
     )
+
+
+class PortalRequest(BaseModel):
+    """Request for Stripe portal URL."""
+    email: EmailStr
+
+
+class PortalResponse(BaseModel):
+    """Response with Stripe portal URL."""
+    success: bool
+    portal_url: Optional[str] = None
+    message: Optional[str] = None
+
+
+@router.post("/api/portal", response_model=PortalResponse)
+async def get_portal(data: PortalRequest):
+    """Get Stripe customer portal URL for subscription management.
+    
+    Allows subscribers to manage their payment method and cancel.
+    """
+    from ..services import get_portal_url
+    
+    client = get_client_by_email(data.email)
+    
+    if not client:
+        return PortalResponse(
+            success=False,
+            message="No subscription found for this email."
+        )
+    
+    if not client.stripe_customer_id:
+        return PortalResponse(
+            success=False,
+            message="No payment information on file."
+        )
+    
+    portal_url = get_portal_url(
+        client.stripe_customer_id,
+        "https://blackabee.com/hire/success.html"
+    )
+    
+    if not portal_url:
+        return PortalResponse(
+            success=False,
+            message="Could not generate portal link. Please email blackabee@gmail.com for help."
+        )
+    
+    return PortalResponse(
+        success=True,
+        portal_url=portal_url
+    )
