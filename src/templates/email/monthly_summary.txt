@@ -1,21 +1,23 @@
-Subject: Monthly summary for {project_name}
+Subject: This month on {project_name}
 
 Hi {name},
 
-Here's what I worked on this month for {project_name}:
+Here's what happened this month:
 
-Date: {session_date}
-Hours: {hours}
+Session: {session_date}
+Time: {hours}
 
-Tasks completed:
+What I shipped:
 {tasks}
 
-PRs opened:
+Pull requests:
 {prs}
 
 Notes:
 {notes}
 
-See you next month!
+Your codebase is slightly better than it was 30 days ago. That's the goal.
+
+See you next month.
 
 Katie

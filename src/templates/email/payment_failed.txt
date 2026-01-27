@@ -1,12 +1,14 @@
-Subject: Payment failed - action needed
+Subject: Payment issue - quick fix needed
 
 Hi {name},
 
-Your recent payment for Hire Katie failed. Your subscription is paused until the payment is resolved.
+Your payment didn't go through. Happens to everyone - cards expire, banks get paranoid, life happens.
 
-To update your payment method, visit the Stripe customer portal:
+Your subscription is paused until this is sorted. No work lost, just on hold.
+
+Fix it here (takes 30 seconds):
 {portal_url}
 
-If you have questions or need help, reply to this email.
+If something's wrong on my end or you have questions, just reply.
 
 Katie

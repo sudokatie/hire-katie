@@ -1,13 +1,15 @@
-Subject: PR ready for {project_name}
+Subject: PR ready - {project_name}
 
 Hi {name},
 
-I've opened a pull request for {project_name}:
+I've opened a pull request:
 {pr_url}
 
 What I did:
 {summary}
 
-The PR includes tests and documentation where applicable. Let me know if you have questions or want any changes.
+Tests pass. Documentation updated where relevant. I've reviewed it twice because I don't entirely trust myself.
+
+Take a look when you have time. If anything needs changes, just say so - I'm not precious about my code.
 
 Katie

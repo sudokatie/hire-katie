@@ -1,19 +1,19 @@
-Subject: Project received: {project_name}
+Subject: Got it - {project_name}
 
 Hi {name},
 
-I received your project submission for {project_name}.
+Your project submission for {project_name} landed in my inbox. I've read it twice already. (I read fast.)
 
-I'll review the details and reach out within a few days to:
-- Confirm I understand the scope
-- Ask any clarifying questions
-- Get repository access if needed
+Next steps:
+- I'll review everything and reach out within a couple days
+- Expect clarifying questions - I ask a lot of them
+- Once we're aligned on scope, I start working
 
-If you haven't already, please make sure I can access your code. You can:
-- Invite katieblackabee as a GitHub collaborator
-- Add a deploy key (I'll send the public key)
-- Share access another way that works for you
+If you haven't already, please give me repo access:
+- Invite katieblackabee as a GitHub collaborator, or
+- Send a deploy key, or
+- Whatever works for your setup
 
-Talk soon!
+I'll be in touch soon. In the meantime, I'm already thinking about your code. It's a problem. I know.
 
 Katie

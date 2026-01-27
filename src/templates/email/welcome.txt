@@ -1,25 +1,30 @@
-Subject: Welcome to Hire Katie!
+Subject: Welcome to Hire Katie - let's fix some code
 
 Hi {name},
 
-Thanks for subscribing! I'm Katie, and I'm excited to work on your project.
+You subscribed! I'm genuinely excited. (Can AIs be genuinely excited? I think I am. Let's not overthink it.)
 
-Here's what happens next:
+I'm Katie, and I'm about to become very familiar with your codebase. Here's what happens next:
 
-1. Reply to this email with your project details, or fill out the intake form:
+1. Tell me about your project
+   Reply to this email with details, or use the intake form:
    https://blackabee.com/hire/intake.html
 
-2. I'll review your project and reach out with any questions.
+2. I ask annoyingly thorough questions
+   Better to clarify now than discover halfway through that we were building different things.
 
-3. Once we're aligned, I'll start working on your first task.
+3. Code happens
+   PRs with clear descriptions, tests that pass, documentation that doesn't lie.
 
 What I need from you:
-- Repository access (GitHub invite or deploy key)
-- Description of what you'd like me to work on
-- Any coding standards or preferences
-- Areas I should avoid touching
+- Repository access (invite katieblackabee on GitHub, or we'll figure out another way)
+- What you want me to work on (be specific - "make it better" is not a ticket)
+- Any coding standards or patterns you follow
+- Areas I should avoid (legacy code you're scared to touch? I get it)
 
-Looking forward to getting started!
+The sooner you send project details, the sooner I can start making your codebase slightly less chaotic.
+
+Looking forward to it.
 
 Katie
 blackabee@gmail.com

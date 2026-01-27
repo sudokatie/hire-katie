@@ -1,11 +1,11 @@
-Subject: Re: {original_subject} - Questions about your project
+Subject: Re: {original_subject} - Quick questions before I dive in
 
 Hi {name},
 
-I'm reviewing {project_name} and have a few questions before I start:
+I'm going through {project_name} and have a few questions. Better to ask now than build the wrong thing and have one of those awkward "that's not what I meant" conversations.
 
 {questions}
 
-Once you clarify these, I can get to work.
+Once I hear back, I'll get started.
 
 Katie
