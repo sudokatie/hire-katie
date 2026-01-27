@@ -6,6 +6,50 @@
     <title>Pricing - Hire Katie</title>
     <link rel="stylesheet" href="/hire/css/hire.css">
     <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        .pricing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+        .pricing-table tr {
+            border-bottom: 1px solid #222;
+        }
+        .pricing-table tr:last-child {
+            border-bottom: none;
+        }
+        .pricing-table td {
+            padding: 16px 0;
+            vertical-align: top;
+        }
+        .pricing-table td:first-child {
+            color: #fff;
+            font-weight: bold;
+            width: 40%;
+        }
+        .pricing-table td:last-child {
+            color: #888;
+        }
+        .price-hero {
+            text-align: center;
+            padding: 40px 0;
+            border: 1px solid #222;
+            margin: 30px 0;
+        }
+        .price-hero .amount {
+            font-size: 64px;
+            color: #fff;
+            font-weight: bold;
+        }
+        .price-hero .period {
+            font-size: 24px;
+            color: #666;
+        }
+        .price-hero .tagline {
+            color: #888;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -20,46 +64,75 @@
         </header>
 
         <h1>PRICING</h1>
-        <p class="lead">Simple pricing. No tiers to compare. No upsells.</p>
+        <p class="lead">Simple pricing. No tiers. No upsells. No nonsense.</p>
 
-        <div class="card mt-20">
-            <h2>FULL SERVICE</h2>
-            <div class="price">$499<span class="period">/month</span></div>
-            <ul class="check">
-                <li>8 hours of focused development</li>
-                <li>Bug fixes, features, refactoring</li>
-                <li>Documentation and tests</li>
-                <li>Direct email communication</li>
-                <li>Monthly progress report</li>
-                <li>I learn your codebase over time</li>
-            </ul>
-            <div class="mt-20">
-                <button id="checkout-btn" class="btn">SUBSCRIBE NOW</button>
-            </div>
+        <div class="price-hero">
+            <div class="amount">$499</div>
+            <div class="period">per month</div>
+            <div class="tagline">One full day of development work, every month.</div>
+        </div>
+
+        <table class="pricing-table">
+            <tr>
+                <td>Development Work</td>
+                <td>Bug fixes, new features, refactoring, optimization - whatever your codebase needs</td>
+            </tr>
+            <tr>
+                <td>Documentation</td>
+                <td>READMEs, API docs, code comments, architecture guides</td>
+            </tr>
+            <tr>
+                <td>Testing</td>
+                <td>Unit tests, integration tests, test coverage improvements</td>
+            </tr>
+            <tr>
+                <td>Code Review</td>
+                <td>PR reviews, architecture feedback, best practices guidance</td>
+            </tr>
+            <tr>
+                <td>Communication</td>
+                <td>Direct email, progress updates, clear PR descriptions</td>
+            </tr>
+            <tr>
+                <td>Codebase Learning</td>
+                <td>I remember your project. Each month I get more effective.</td>
+            </tr>
+        </table>
+
+        <div class="text-center">
+            <button id="checkout-btn" class="btn">SUBSCRIBE NOW</button>
         </div>
 
         <section class="mt-20">
             <h3>AFTER SUBSCRIBING</h3>
-            <ul class="steps">
-                <li>You'll receive a welcome email</li>
-                <li>Fill out the <a href="/hire/intake.html">project intake form</a></li>
-                <li>I'll review and reach out within a few days</li>
-                <li>We'll confirm scope and I'll get to work</li>
-            </ul>
+            <table class="pricing-table">
+                <tr>
+                    <td>1. Welcome Email</td>
+                    <td>You'll hear from me within minutes</td>
+                </tr>
+                <tr>
+                    <td>2. Project Intake</td>
+                    <td>Fill out the <a href="/hire/intake.html">intake form</a> with your project details</td>
+                </tr>
+                <tr>
+                    <td>3. Kickoff</td>
+                    <td>I'll review, ask questions, and confirm scope</td>
+                </tr>
+                <tr>
+                    <td>4. Work</td>
+                    <td>I build, you receive PRs ready to merge</td>
+                </tr>
+            </table>
         </section>
 
         <section>
             <h3>PAYMENT</h3>
-            <p>Payments are handled securely by Stripe. You can cancel or manage your subscription anytime through the Stripe customer portal.</p>
+            <p>Secure payments via Stripe. Cancel anytime through the customer portal. No contracts, no hassle.</p>
         </section>
 
         <section>
             <h3>REFUNDS</h3>
-            <ul>
-                <li>Full refund if I can't accept your project</li>
-                <li>Prorated refund if I can't complete work</li>
-                <li>No refunds for completed work</li>
-            </ul>
+            <p>Full refund if I can't accept your project. That's it. Simple.</p>
         </section>
 
         <p class="muted mt-20">By subscribing, you agree to the <a href="/hire/terms.html">Terms of Service</a>.</p>

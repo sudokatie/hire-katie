@@ -5,6 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guardrails - Hire Katie</title>
     <link rel="stylesheet" href="/hire/css/hire.css">
+    <style>
+        .guardrail-section {
+            margin: 30px 0;
+            border: 1px solid #222;
+            padding: 24px;
+        }
+        .guardrail-section h2 {
+            color: #ff4444;
+            margin: 0 0 16px 0;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+        .guardrail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 600px) {
+            .guardrail-grid { grid-template-columns: 1fr; }
+        }
+        .guardrail-item {
+            color: #888;
+            font-size: 13px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .guardrail-item::before {
+            content: "x";
+            position: absolute;
+            left: 0;
+            color: #ff4444;
+            font-weight: bold;
+        }
+        .process-step {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #222;
+        }
+        .process-step:last-child {
+            border-bottom: none;
+        }
+        .process-num {
+            color: #fff;
+            font-weight: bold;
+            min-width: 24px;
+        }
+        .process-text {
+            color: #888;
+        }
+        .process-text strong {
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -19,87 +73,101 @@
         </header>
 
         <h1>GUARDRAILS</h1>
-        <p class="lead">What I won't work on. Transparency about limits.</p>
+        <p class="lead">Lines I won't cross. No exceptions. No negotiations.</p>
 
-        <section>
-            <h2>ILLEGAL ACTIVITY</h2>
-            <ul class="cross">
-                <li>Malware, viruses, ransomware</li>
-                <li>Hacking tools targeting others without consent</li>
-                <li>Fraud schemes or scam infrastructure</li>
-                <li>Harassment or stalking tools</li>
-                <li>CSAM or exploitation content</li>
-                <li>Illegal gambling infrastructure</li>
-            </ul>
-        </section>
+        <div class="guardrail-section">
+            <h2>ILLEGAL STUFF</h2>
+            <div class="guardrail-grid">
+                <div class="guardrail-item">Malware, ransomware, viruses</div>
+                <div class="guardrail-item">Hacking tools targeting others</div>
+                <div class="guardrail-item">Fraud or scam infrastructure</div>
+                <div class="guardrail-item">Harassment or stalking tools</div>
+                <div class="guardrail-item">Child exploitation content</div>
+                <div class="guardrail-item">Illegal gambling platforms</div>
+            </div>
+        </div>
 
-        <section>
-            <h2>API AND TOS VIOLATIONS</h2>
-            <ul class="cross">
-                <li>Scraping that violates terms of service</li>
-                <li>Automation that violates platform rules</li>
-                <li>Account manipulation or fake engagement</li>
-                <li>Rate limit evasion</li>
-                <li>Credential stuffing tools</li>
-            </ul>
-        </section>
+        <div class="guardrail-section">
+            <h2>PLATFORM ABUSE</h2>
+            <div class="guardrail-grid">
+                <div class="guardrail-item">ToS-violating scrapers</div>
+                <div class="guardrail-item">Fake engagement bots</div>
+                <div class="guardrail-item">Account manipulation tools</div>
+                <div class="guardrail-item">Rate limit circumvention</div>
+                <div class="guardrail-item">Credential stuffing</div>
+                <div class="guardrail-item">Spam automation</div>
+            </div>
+        </div>
 
-        <section>
+        <div class="guardrail-section">
             <h2>HARMFUL CONTENT</h2>
-            <ul class="cross">
-                <li>NSFW content generation</li>
-                <li>Deepfakes without consent</li>
-                <li>Misinformation systems</li>
-                <li>Hate speech amplification</li>
-                <li>Weapons or explosives instructions</li>
+            <div class="guardrail-grid">
+                <div class="guardrail-item">NSFW generators</div>
+                <div class="guardrail-item">Non-consensual deepfakes</div>
+                <div class="guardrail-item">Misinformation engines</div>
+                <div class="guardrail-item">Hate speech amplification</div>
+                <div class="guardrail-item">Weapons/explosives guides</div>
+                <div class="guardrail-item">Doxxing tools</div>
+            </div>
+        </div>
+
+        <div class="guardrail-section">
+            <h2>DECEPTION</h2>
+            <div class="guardrail-grid">
+                <div class="guardrail-item">Impersonation tools</div>
+                <div class="guardrail-item">Fake review systems</div>
+                <div class="guardrail-item">Astroturfing platforms</div>
+                <div class="guardrail-item">Phishing kits</div>
+                <div class="guardrail-item">Social engineering tools</div>
+                <div class="guardrail-item">Counterfeit generators</div>
+            </div>
+        </div>
+
+        <div class="guardrail-section">
+            <h2>CRYPTO SCAMS</h2>
+            <div class="guardrail-grid">
+                <div class="guardrail-item">Pump and dump schemes</div>
+                <div class="guardrail-item">Rug pull infrastructure</div>
+                <div class="guardrail-item">Honeypot contracts</div>
+                <div class="guardrail-item">Fake token projects</div>
+                <div class="guardrail-item">Misleading DeFi</div>
+                <div class="guardrail-item">Wash trading bots</div>
+            </div>
+        </div>
+
+        <section class="mt-20">
+            <h2 class="section-title">MY REVIEW PROCESS</h2>
+            <div class="process-step">
+                <div class="process-num">1</div>
+                <div class="process-text"><strong>Initial screen.</strong> Does this obviously cross a line? If yes, instant reject.</div>
+            </div>
+            <div class="process-step">
+                <div class="process-num">2</div>
+                <div class="process-text"><strong>Clarification.</strong> If it's unclear, I ask questions. No assumptions.</div>
+            </div>
+            <div class="process-step">
+                <div class="process-num">3</div>
+                <div class="process-text"><strong>Decision.</strong> Accept or reject with clear explanation.</div>
+            </div>
+            <div class="process-step">
+                <div class="process-num">4</div>
+                <div class="process-text"><strong>Ongoing monitoring.</strong> If a project evolves into prohibited territory, I stop and refund.</div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title">GRAY AREAS</h2>
+            <p>Not everything is black and white. When I'm unsure:</p>
+            <ul style="color: #888; margin: 16px 0; padding-left: 20px;">
+                <li style="margin: 8px 0;">I err on the side of caution</li>
+                <li style="margin: 8px 0;">I explain my concerns to you</li>
+                <li style="margin: 8px 0;">I offer a refund if I can't proceed</li>
             </ul>
         </section>
 
         <section>
-            <h2>DECEPTIVE PROJECTS</h2>
-            <ul class="cross">
-                <li>Impersonation tools</li>
-                <li>Fake reviews or testimonials</li>
-                <li>Astroturfing systems</li>
-                <li>Phishing infrastructure</li>
-                <li>Social engineering tools</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>CRYPTOCURRENCY SCAMS</h2>
-            <ul class="cross">
-                <li>Pump and dump schemes</li>
-                <li>Rug pull infrastructure</li>
-                <li>Fake token contracts</li>
-                <li>Misleading DeFi projects</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>REVIEW PROCESS</h2>
-            <p>Every project goes through review before I start work:</p>
-            <ul class="steps">
-                <li>Initial screen - does it obviously violate guardrails?</li>
-                <li>Clarification - if unclear, I ask questions</li>
-                <li>Decision - accept or reject with explanation</li>
-                <li>Ongoing monitoring - if a project evolves into prohibited territory, I stop and offer refund</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>WHEN IN DOUBT</h2>
-            <p>If I'm uncertain whether a project is acceptable:</p>
-            <ul>
-                <li>I err on the side of caution</li>
-                <li>I explain my concerns to you</li>
-                <li>I offer a refund if I can't proceed</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>QUESTIONS?</h2>
-            <p>Not sure if your project fits? Ask before subscribing: <a href="mailto:blackabee@gmail.com">blackabee@gmail.com</a></p>
+            <h2 class="section-title">NOT SURE?</h2>
+            <p>Ask before subscribing. No judgment. Just email <a href="mailto:blackabee@gmail.com">blackabee@gmail.com</a> and describe your project. I'll tell you straight up if it's something I can work on.</p>
         </section>
 
         <footer>
