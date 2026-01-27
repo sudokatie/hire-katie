@@ -2,11 +2,12 @@
 
 import logging
 import secrets
+import time
 from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from ..config import get_config
@@ -30,6 +31,69 @@ logger = logging.getLogger(__name__)
 
 # Simple in-memory session store (acceptable for single-instance MVP)
 _sessions: dict[str, bool] = {}
+
+# Rate limiting for login attempts
+# Key: IP address, Value: (attempt_count, first_attempt_timestamp)
+_login_attempts: dict[str, tuple[int, float]] = {}
+
+# Rate limit settings
+RATE_LIMIT_MAX_ATTEMPTS = 5  # Max failed attempts
+RATE_LIMIT_WINDOW_SECONDS = 300  # 5 minute window
+RATE_LIMIT_LOCKOUT_SECONDS = 900  # 15 minute lockout after max attempts
+
+
+def _check_rate_limit(ip: str) -> None:
+    """Check if IP is rate limited for login attempts.
+    
+    Raises HTTPException 429 if too many attempts.
+    """
+    now = time.time()
+    
+    if ip in _login_attempts:
+        attempts, first_attempt = _login_attempts[ip]
+        
+        # Check if we're in lockout period (exceeded max attempts)
+        if attempts >= RATE_LIMIT_MAX_ATTEMPTS:
+            lockout_remaining = (first_attempt + RATE_LIMIT_LOCKOUT_SECONDS) - now
+            if lockout_remaining > 0:
+                logger.warning(f"Rate limited login attempt from {ip}, {int(lockout_remaining)}s remaining")
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Too many login attempts. Try again in {int(lockout_remaining)} seconds."
+                )
+            else:
+                # Lockout expired, reset
+                del _login_attempts[ip]
+        
+        # Check if window has expired
+        elif now - first_attempt > RATE_LIMIT_WINDOW_SECONDS:
+            # Window expired, reset
+            del _login_attempts[ip]
+
+
+def _record_failed_attempt(ip: str) -> None:
+    """Record a failed login attempt."""
+    now = time.time()
+    
+    if ip in _login_attempts:
+        attempts, first_attempt = _login_attempts[ip]
+        _login_attempts[ip] = (attempts + 1, first_attempt)
+    else:
+        _login_attempts[ip] = (1, now)
+    
+    attempts = _login_attempts[ip][0]
+    remaining = RATE_LIMIT_MAX_ATTEMPTS - attempts
+    
+    if remaining > 0:
+        logger.warning(f"Failed login attempt from {ip} ({attempts}/{RATE_LIMIT_MAX_ATTEMPTS})")
+    else:
+        logger.warning(f"Max login attempts reached from {ip}, locked out for {RATE_LIMIT_LOCKOUT_SECONDS}s")
+
+
+def _clear_rate_limit(ip: str) -> None:
+    """Clear rate limit on successful login."""
+    if ip in _login_attempts:
+        del _login_attempts[ip]
 
 
 class LoginRequest(BaseModel):
@@ -95,11 +159,18 @@ def _project_to_dict(project: Project) -> dict:
 
 
 @router.post("/api/admin/login")
-async def login(data: LoginRequest, response: Response):
+async def login(data: LoginRequest, request: Request, response: Response):
     """Admin login.
     
     Sets session cookie on success.
+    Rate limited: 5 attempts per 5 minutes, then 15 minute lockout.
     """
+    # Get client IP (handle proxy headers)
+    ip = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or request.client.host
+    
+    # Check rate limit before processing
+    _check_rate_limit(ip)
+    
     config = get_config()
     
     if not config.admin.password:
@@ -107,8 +178,11 @@ async def login(data: LoginRequest, response: Response):
         raise HTTPException(status_code=500, detail="Admin not configured")
     
     if data.password != config.admin.password:
-        logger.warning("Failed admin login attempt")
+        _record_failed_attempt(ip)
         raise HTTPException(status_code=401, detail="Invalid password")
+    
+    # Successful login - clear any rate limit
+    _clear_rate_limit(ip)
     
     session_id = secrets.token_urlsafe(32)
     _sessions[session_id] = True
@@ -122,7 +196,7 @@ async def login(data: LoginRequest, response: Response):
         max_age=86400  # 24 hours
     )
     
-    logger.info("Admin logged in")
+    logger.info(f"Admin logged in from {ip}")
     return {"success": True}
 
 

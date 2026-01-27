@@ -1,6 +1,7 @@
 """Tests for admin routes."""
 
 import pytest
+from unittest.mock import patch
 
 
 class TestAdminLogin:
@@ -34,6 +35,87 @@ class TestAdminLogin:
         )
         
         assert response.status_code == 422
+
+
+class TestLoginRateLimit:
+    """Tests for login rate limiting."""
+
+    def test_allows_attempts_under_limit(self, test_client):
+        """Should allow login attempts under the rate limit."""
+        # Clear any existing rate limit state
+        from src.routes.admin import _login_attempts
+        _login_attempts.clear()
+        
+        # Make 4 failed attempts (under limit of 5)
+        for i in range(4):
+            response = test_client.post(
+                "/api/admin/login",
+                json={"password": "wrong"}
+            )
+            assert response.status_code == 401
+
+    def test_blocks_after_max_attempts(self, test_client):
+        """Should return 429 after too many failed attempts."""
+        from src.routes.admin import _login_attempts
+        _login_attempts.clear()
+        
+        # Make 5 failed attempts to trigger lockout
+        for i in range(5):
+            test_client.post(
+                "/api/admin/login",
+                json={"password": "wrong"}
+            )
+        
+        # 6th attempt should be rate limited
+        response = test_client.post(
+            "/api/admin/login",
+            json={"password": "wrong"}
+        )
+        
+        assert response.status_code == 429
+        assert "Too many login attempts" in response.json()["detail"]
+
+    def test_successful_login_clears_rate_limit(self, test_client):
+        """Should clear rate limit on successful login."""
+        from src.routes.admin import _login_attempts
+        _login_attempts.clear()
+        
+        # Make some failed attempts
+        for i in range(3):
+            test_client.post(
+                "/api/admin/login",
+                json={"password": "wrong"}
+            )
+        
+        # Successful login
+        response = test_client.post(
+            "/api/admin/login",
+            json={"password": "testpassword"}
+        )
+        assert response.status_code == 200
+        
+        # Rate limit should be cleared - verify by checking internal state
+        # The IP will be "testclient" for test client
+        assert len(_login_attempts) == 0 or "testclient" not in _login_attempts
+
+    def test_rate_limit_expires(self, test_client):
+        """Should allow attempts after lockout expires."""
+        from src.routes.admin import _login_attempts, RATE_LIMIT_LOCKOUT_SECONDS
+        import time
+        
+        _login_attempts.clear()
+        
+        # Simulate expired lockout by setting old timestamp
+        _login_attempts["testclient"] = (5, time.time() - RATE_LIMIT_LOCKOUT_SECONDS - 1)
+        
+        # Should be allowed now
+        response = test_client.post(
+            "/api/admin/login",
+            json={"password": "wrong"}
+        )
+        
+        # Should get 401 (wrong password) not 429 (rate limited)
+        assert response.status_code == 401
 
 
 class TestAdminAuth:
