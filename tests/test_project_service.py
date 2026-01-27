@@ -72,6 +72,38 @@ class TestGetProject:
         assert found is None
 
 
+class TestGetProjectWithSessions:
+    def test_returns_project_and_sessions(self, sample_project, db_session):
+        from datetime import date
+        from decimal import Decimal
+        from src.services import log_session
+        
+        # Log some sessions
+        log_session(sample_project.id, date(2026, 1, 10), Decimal("4"))
+        log_session(sample_project.id, date(2026, 1, 15), Decimal("8"))
+        
+        result = get_project_with_sessions(sample_project.id)
+        
+        assert result is not None
+        project, sessions = result
+        assert project.id == sample_project.id
+        assert len(sessions) == 2
+        # Sessions should be ordered by date descending
+        assert sessions[0].session_date == date(2026, 1, 15)
+
+    def test_returns_none_for_missing(self, db_session):
+        result = get_project_with_sessions(9999)
+        assert result is None
+
+    def test_returns_empty_sessions_for_new_project(self, sample_project, db_session):
+        result = get_project_with_sessions(sample_project.id)
+        
+        assert result is not None
+        project, sessions = result
+        assert project.id == sample_project.id
+        assert len(sessions) == 0
+
+
 class TestUpdateProjectStatus:
     def test_updates_status(self, sample_project):
         updated = update_project_status(sample_project.id, ProjectStatus.ACTIVE)
