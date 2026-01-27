@@ -39,6 +39,7 @@ from .session_service import (
 )
 from .stripe_service import (
     StripeEvent,
+    create_checkout_session,
     get_customer_email,
     get_portal_url,
     get_subscription_status,
@@ -81,6 +82,7 @@ __all__ = [
     "get_customer_email",
     "get_portal_url",
     "get_subscription_status",
+    "create_checkout_session",
     # Email
     "Email",
     "render_template",

@@ -158,3 +158,36 @@ def get_subscription_status(subscription_id: str) -> Optional[str]:
     except stripe.error.StripeError as e:
         logger.error(f"Failed to retrieve subscription {subscription_id}: {e}")
         return None
+
+
+def create_checkout_session(
+    price_id: str,
+    success_url: str,
+    cancel_url: str
+) -> Optional[str]:
+    """Create a Stripe Checkout session for subscription.
+    
+    Args:
+        price_id: Stripe price ID for the subscription
+        success_url: URL to redirect to on successful payment
+        cancel_url: URL to redirect to if user cancels
+    
+    Returns:
+        Checkout session URL if successful, None otherwise
+    """
+    try:
+        session = stripe.checkout.Session.create(
+            mode='subscription',
+            line_items=[{
+                'price': price_id,
+                'quantity': 1,
+            }],
+            success_url=success_url,
+            cancel_url=cancel_url,
+            allow_promotion_codes=True,
+        )
+        logger.info(f"Created checkout session: {session.id}")
+        return session.url
+    except stripe.error.StripeError as e:
+        logger.error(f"Failed to create checkout session: {e}")
+        return None

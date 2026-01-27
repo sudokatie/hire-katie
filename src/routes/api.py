@@ -6,9 +6,11 @@ from typing import Optional
 from fastapi import APIRouter
 from pydantic import BaseModel, EmailStr
 
+from ..config import get_config
 from ..models.client import ClientStatus
 from ..services import (
     IntakeData,
+    create_checkout_session,
     create_project,
     get_client_by_email,
     list_projects,
@@ -169,4 +171,45 @@ async def get_portal(data: PortalRequest):
     return PortalResponse(
         success=True,
         portal_url=portal_url
+    )
+
+
+class CheckoutResponse(BaseModel):
+    """Response with Stripe checkout URL."""
+    success: bool
+    checkout_url: Optional[str] = None
+    message: Optional[str] = None
+
+
+@router.post("/api/checkout", response_model=CheckoutResponse)
+async def create_checkout():
+    """Create a Stripe checkout session for subscription.
+    
+    Returns a URL to redirect the user to Stripe's hosted checkout page.
+    """
+    config = get_config()
+    
+    if not config.stripe.price_id:
+        logger.error("Stripe price_id not configured")
+        return CheckoutResponse(
+            success=False,
+            message="Payment system not configured. Please contact blackabee@gmail.com."
+        )
+    
+    checkout_url = create_checkout_session(
+        price_id=config.stripe.price_id,
+        success_url="https://blackabee.com/hire/success.html?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url="https://blackabee.com/hire/pricing.html"
+    )
+    
+    if not checkout_url:
+        return CheckoutResponse(
+            success=False,
+            message="Could not create checkout session. Please try again or contact blackabee@gmail.com."
+        )
+    
+    logger.info("Created checkout session, redirecting to Stripe")
+    return CheckoutResponse(
+        success=True,
+        checkout_url=checkout_url
     )
