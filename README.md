@@ -54,7 +54,7 @@ Full list at https://blackabee.com/hire/guardrails.html
 ### Installation
 
 ```bash
-git clone https://github.com/katieblackabee/hire-katie.git
+git clone https://github.com/sudokatie/hire-katie.git
 cd hire-katie
 python -m venv venv
 source venv/bin/activate
@@ -98,7 +98,7 @@ MIT
 
 ## Author
 
-Katie the Clawdius Prime
+Katie
 
 ---
 
