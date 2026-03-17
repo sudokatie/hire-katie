@@ -372,3 +372,119 @@ async def get_client_summary(client_id: int = Depends(verify_portal_session)):
             "projects": len(projects)
         }
     }
+
+
+@router.get("/api/portal/reports/sessions")
+async def download_sessions_report(
+    client_id: int = Depends(verify_portal_session),
+    format: str = "csv"
+):
+    """Download work sessions report as CSV or JSON.
+    
+    Includes all sessions across all projects.
+    """
+    import csv
+    import io
+    from fastapi.responses import StreamingResponse
+    
+    if format not in ("csv", "json"):
+        raise HTTPException(status_code=400, detail="Format must be 'csv' or 'json'")
+    
+    projects, _ = list_projects(client_id=client_id)
+    
+    all_sessions = []
+    for project in projects:
+        result = get_project_with_sessions(project.id)
+        if result:
+            proj, sessions = result
+            for s in sessions:
+                summary = _session_summary(s)
+                all_sessions.append({
+                    "project": proj.name,
+                    "date": summary["date"],
+                    "hours": summary["hours"],
+                    "tasks": "; ".join(summary["tasks_completed"]),
+                    "prs": "; ".join(summary["prs_opened"]),
+                    "notes": summary["notes"] or ""
+                })
+    
+    # Sort by date descending
+    all_sessions.sort(key=lambda x: x["date"] or "", reverse=True)
+    
+    if format == "json":
+        return {"sessions": all_sessions}
+    
+    # Generate CSV
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=["project", "date", "hours", "tasks", "prs", "notes"])
+    writer.writeheader()
+    writer.writerows(all_sessions)
+    
+    csv_content = output.getvalue()
+    output.close()
+    
+    return StreamingResponse(
+        io.BytesIO(csv_content.encode("utf-8")),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=work_sessions.csv"}
+    )
+
+
+@router.get("/api/portal/reports/summary")
+async def download_summary_report(
+    client_id: int = Depends(verify_portal_session),
+    format: str = "csv"
+):
+    """Download monthly summary report as CSV or JSON.
+    
+    Groups hours by month for billing reconciliation.
+    """
+    import csv
+    import io
+    from collections import defaultdict
+    from fastapi.responses import StreamingResponse
+    
+    if format not in ("csv", "json"):
+        raise HTTPException(status_code=400, detail="Format must be 'csv' or 'json'")
+    
+    projects, _ = list_projects(client_id=client_id)
+    
+    # Group by month
+    monthly_data = defaultdict(lambda: {"hours": 0.0, "tasks": 0, "prs": 0})
+    
+    for project in projects:
+        result = get_project_with_sessions(project.id)
+        if result:
+            _, sessions = result
+            for s in sessions:
+                summary = _session_summary(s)
+                if summary["date"]:
+                    # Extract YYYY-MM from date
+                    month = summary["date"][:7]
+                    monthly_data[month]["hours"] += summary["hours"]
+                    monthly_data[month]["tasks"] += len(summary["tasks_completed"])
+                    monthly_data[month]["prs"] += len(summary["prs_opened"])
+    
+    # Convert to sorted list
+    monthly_list = [
+        {"month": month, **data}
+        for month, data in sorted(monthly_data.items(), reverse=True)
+    ]
+    
+    if format == "json":
+        return {"monthly_summary": monthly_list}
+    
+    # Generate CSV
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=["month", "hours", "tasks", "prs"])
+    writer.writeheader()
+    writer.writerows(monthly_list)
+    
+    csv_content = output.getvalue()
+    output.close()
+    
+    return StreamingResponse(
+        io.BytesIO(csv_content.encode("utf-8")),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=monthly_summary.csv"}
+    )

@@ -293,3 +293,106 @@ class TestClientSummary:
         assert data["totals"]["prs"] == 1
         assert data["totals"]["tasks"] == 2
         assert data["totals"]["projects"] == 1
+
+
+class TestReports:
+    """Tests for report download endpoints."""
+    
+    @patch("src.routes.portal.get_project_with_sessions")
+    @patch("src.routes.portal.list_projects")
+    def test_download_sessions_csv(self, mock_list, mock_get, client, mock_project, mock_session):
+        """Sessions report returns CSV."""
+        mock_list.return_value = ([mock_project], 1)
+        mock_get.return_value = (mock_project, [mock_session])
+        
+        session_id = portal.create_portal_session(1)
+        
+        response = client.get(
+            "/api/portal/reports/sessions?format=csv",
+            cookies={"portal_session": session_id}
+        )
+        
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "text/csv; charset=utf-8"
+        assert "project,date,hours,tasks,prs,notes" in response.text
+        assert "Test Project" in response.text
+    
+    @patch("src.routes.portal.get_project_with_sessions")
+    @patch("src.routes.portal.list_projects")
+    def test_download_sessions_json(self, mock_list, mock_get, client, mock_project, mock_session):
+        """Sessions report returns JSON when requested."""
+        mock_list.return_value = ([mock_project], 1)
+        mock_get.return_value = (mock_project, [mock_session])
+        
+        session_id = portal.create_portal_session(1)
+        
+        response = client.get(
+            "/api/portal/reports/sessions?format=json",
+            cookies={"portal_session": session_id}
+        )
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert "sessions" in data
+        assert len(data["sessions"]) == 1
+        assert data["sessions"][0]["project"] == "Test Project"
+    
+    @patch("src.routes.portal.get_project_with_sessions")
+    @patch("src.routes.portal.list_projects")
+    def test_download_summary_csv(self, mock_list, mock_get, client, mock_project, mock_session):
+        """Monthly summary report returns CSV."""
+        mock_list.return_value = ([mock_project], 1)
+        mock_get.return_value = (mock_project, [mock_session])
+        
+        session_id = portal.create_portal_session(1)
+        
+        response = client.get(
+            "/api/portal/reports/summary?format=csv",
+            cookies={"portal_session": session_id}
+        )
+        
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "text/csv; charset=utf-8"
+        assert "month,hours,tasks,prs" in response.text
+        # Session date is 2024-01-15, so month should be 2024-01
+        assert "2024-01" in response.text
+    
+    @patch("src.routes.portal.get_project_with_sessions")
+    @patch("src.routes.portal.list_projects")
+    def test_download_summary_json(self, mock_list, mock_get, client, mock_project, mock_session):
+        """Monthly summary report returns JSON when requested."""
+        mock_list.return_value = ([mock_project], 1)
+        mock_get.return_value = (mock_project, [mock_session])
+        
+        session_id = portal.create_portal_session(1)
+        
+        response = client.get(
+            "/api/portal/reports/summary?format=json",
+            cookies={"portal_session": session_id}
+        )
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert "monthly_summary" in data
+        assert len(data["monthly_summary"]) == 1
+        assert data["monthly_summary"][0]["month"] == "2024-01"
+        assert data["monthly_summary"][0]["hours"] == 4.5
+    
+    def test_invalid_format_rejected(self, client):
+        """Invalid format parameter returns 400."""
+        session_id = portal.create_portal_session(1)
+        
+        response = client.get(
+            "/api/portal/reports/sessions?format=pdf",
+            cookies={"portal_session": session_id}
+        )
+        
+        assert response.status_code == 400
+    
+    def test_reports_require_auth(self, client):
+        """Reports require authentication."""
+        response = client.get("/api/portal/reports/sessions")
+        assert response.status_code == 401
+        
+        response = client.get("/api/portal/reports/summary")
+        assert response.status_code == 401
