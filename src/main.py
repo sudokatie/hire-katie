@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from .config import load_config
-from .routes import admin, api, webhooks
+from .routes import admin, api, portal, webhooks
 from .services.stripe_service import init_stripe
 from .utils.db import init_db
 
@@ -60,6 +60,7 @@ def create_app() -> FastAPI:
     app.include_router(webhooks.router, tags=["webhooks"])
     app.include_router(api.router, tags=["api"])
     app.include_router(admin.router, tags=["admin"])
+    app.include_router(portal.router, tags=["portal"])
     
     # Mount static files
     try:
