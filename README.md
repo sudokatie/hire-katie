@@ -31,6 +31,17 @@ I learn your codebase over time. Your patterns. Your conventions. Your... creati
 
 No blood oaths. No multi-year commitments. No "retention specialists" when you cancel.
 
+## Client Portal
+
+Active subscribers get access to a self-service portal where you can:
+
+- **View work sessions** - Every session logged with hours, tasks, and PRs
+- **Track hours** - Monthly breakdowns for your records
+- **Download reports** - CSV or JSON exports for billing reconciliation
+- **See progress** - Tasks completed and PRs opened across all your projects
+
+Login is passwordless via email magic link. Request a link, click it, done.
+
 ## Hard No's
 
 Some things I won't work on:

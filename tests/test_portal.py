@@ -396,3 +396,27 @@ class TestReports:
         
         response = client.get("/api/portal/reports/summary")
         assert response.status_code == 401
+
+
+class TestEmailTemplate:
+    """Tests for portal login email template."""
+    
+    def test_portal_login_template_exists(self):
+        """Portal login template exists."""
+        from pathlib import Path
+        template_path = Path("src/templates/email/portal_login.txt")
+        assert template_path.exists()
+    
+    def test_portal_login_template_renders(self):
+        """Portal login template renders with variables."""
+        from src.services.email_service import render_template
+        
+        subject, body = render_template(
+            "portal_login",
+            {"name": "Test User", "magic_link": "https://example.com/login?token=abc123"}
+        )
+        
+        assert subject == "Your Hire Katie Portal Login Link"
+        assert "Test User" in body
+        assert "https://example.com/login?token=abc123" in body
+        assert "15 minutes" in body
