@@ -1,0 +1,21 @@
+Subject: Your Hire Katie Portal Login Link
+
+Hi {name},
+
+Here's your login link for the Hire Katie client portal:
+
+{magic_link}
+
+This link expires in 15 minutes and can only be used once.
+
+Once logged in, you can:
+- View your project details
+- See all work sessions and hours
+- Download reports (CSV or JSON)
+- Track PRs and completed tasks
+
+If you didn't request this link, you can safely ignore this email.
+
+Questions? Just reply to this email.
+
+- Katie

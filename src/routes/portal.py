@@ -23,6 +23,7 @@ from ..services import (
     get_project_with_sessions,
     list_projects,
     parse_session_json,
+    send_template,
 )
 from ..utils.db import get_session as get_db_session
 
@@ -193,18 +194,30 @@ async def request_login(data: MagicLinkRequest):
     if client and client.status in (ClientStatus.ACTIVE, ClientStatus.PAUSED):
         token = create_magic_link(email)
         
-        # TODO: Send email with magic link
-        # For now, log the token (development only)
+        # Build magic link URL
         config = get_config()
         base_url = f"http://{config.server.host}:{config.server.port}"
         if config.server.host == "0.0.0.0":
             base_url = f"http://localhost:{config.server.port}"
         magic_link = f"{base_url}/portal/login?token={token}"
         
-        logger.info(f"Magic link for {email}: {magic_link}")
+        # Send email with magic link
+        client_name = client.name or "there"
+        email_sent = send_template(
+            to=email,
+            template_name="portal_login",
+            variables={
+                "name": client_name,
+                "magic_link": magic_link
+            }
+        )
         
-        # In production, send via email service:
-        # await send_magic_link_email(email, magic_link)
+        if email_sent:
+            logger.info(f"Magic link email sent to {email}")
+        else:
+            # Log the link as fallback (also useful for development)
+            logger.warning(f"Failed to send magic link email to {email}")
+            logger.info(f"Magic link for {email}: {magic_link}")
     else:
         logger.info(f"Login request for unknown/inactive email: {email}")
     
