@@ -37,6 +37,15 @@ from .session_service import (
     log_session,
     parse_session_json,
 )
+from .update_service import (
+    ClientUpdate,
+    ProjectUpdate,
+    format_update_text,
+    get_client_update,
+    send_client_update,
+    send_monthly_updates,
+    send_weekly_updates,
+)
 from .stripe_service import (
     StripeEvent,
     create_checkout_session,
@@ -91,4 +100,12 @@ __all__ = [
     "check_inbox",
     "read_email",
     "archive_email",
+    # Updates
+    "ClientUpdate",
+    "ProjectUpdate",
+    "format_update_text",
+    "get_client_update",
+    "send_client_update",
+    "send_weekly_updates",
+    "send_monthly_updates",
 ]
