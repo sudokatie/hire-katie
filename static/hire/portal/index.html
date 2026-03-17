@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Client Portal - Hire Katie</title>
+    <link rel="stylesheet" href="/hire/css/hire.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .project-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: border-color 0.15s ease;
+        }
+        .project-card:hover {
+            border-color: var(--accent);
+        }
+        .project-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 8px;
+        }
+        .project-stats {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .project-stats span {
+            color: var(--text);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-active { background: var(--green); color: var(--bg); }
+        .status-paused { background: var(--orange); color: var(--bg); }
+        .status-completed { background: var(--text-muted); color: var(--bg); }
+        .download-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .download-links a {
+            font-size: 14px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .user-info {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .user-info strong {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav>
+                <a href="/hire/">HOME</a>
+                <a href="/hire/portal/" class="active">DASHBOARD</a>
+                <a href="#" id="logout-link">LOGOUT</a>
+            </nav>
+        </header>
+
+        <div id="loading" class="loading">
+            Loading your dashboard...
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <div class="user-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p class="user-info">Logged in as <strong id="user-email"></strong></p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-hours">-</div>
+                    <div class="stat-label">Total Hours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-tasks">-</div>
+                    <div class="stat-label">Tasks Done</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-prs">-</div>
+                    <div class="stat-label">PRs Opened</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-projects">-</div>
+                    <div class="stat-label">Projects</div>
+                </div>
+            </div>
+
+            <h2>Your Projects</h2>
+            <div id="projects-list" class="mt-20">
+                <!-- Projects loaded dynamically -->
+            </div>
+
+            <div class="download-links">
+                <a href="/api/portal/reports/sessions?format=csv" download>Download Sessions CSV</a>
+                <a href="/api/portal/reports/summary?format=csv" download>Download Monthly Summary</a>
+            </div>
+        </div>
+
+        <div id="error" style="display: none;" class="panel">
+            <h2 style="color: var(--red);">Not Logged In</h2>
+            <p>Please <a href="/hire/portal/login.html">login</a> to access your dashboard.</p>
+        </div>
+
+        <footer>
+            <p>Questions? Email <a href="mailto:blackabee@gmail.com">blackabee@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const loading = document.getElementById('loading');
+        const dashboard = document.getElementById('dashboard');
+        const error = document.getElementById('error');
+        
+        // Check authentication and load data
+        async function loadDashboard() {
+            try {
+                // Get current user
+                const meResponse = await fetch('/api/portal/me');
+                if (meResponse.status === 401) {
+                    throw new Error('Not authenticated');
+                }
+                const meData = await meResponse.json();
+                
+                document.getElementById('user-email').textContent = meData.client.email;
+                
+                // Get summary
+                const summaryResponse = await fetch('/api/portal/summary');
+                const summaryData = await summaryResponse.json();
+                
+                document.getElementById('total-hours').textContent = summaryData.totals.hours.toFixed(1);
+                document.getElementById('total-tasks').textContent = summaryData.totals.tasks;
+                document.getElementById('total-prs').textContent = summaryData.totals.prs;
+                document.getElementById('total-projects').textContent = summaryData.totals.projects;
+                
+                // Render projects
+                const projectsList = document.getElementById('projects-list');
+                projectsList.innerHTML = '';
+                
+                for (const project of summaryData.projects) {
+                    const statusClass = 'status-' + project.status.toLowerCase();
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    card.innerHTML = `
+                        <div class="project-name">
+                            ${project.name}
+                            <span class="status-badge ${statusClass}">${project.status}</span>
+                        </div>
+                        <div class="project-stats">
+                            <div><span>${project.hours.toFixed(1)}</span> hours</div>
+                            <div><span>${project.tasks}</span> tasks</div>
+                            <div><span>${project.prs}</span> PRs</div>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        window.location.href = '/hire/portal/project.html?id=' + project.id;
+                    });
+                    projectsList.appendChild(card);
+                }
+                
+                if (summaryData.projects.length === 0) {
+                    projectsList.innerHTML = '<p class="muted">No projects yet. Submit an intake form to get started!</p>';
+                }
+                
+                loading.style.display = 'none';
+                dashboard.style.display = 'block';
+                
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+            }
+        }
+        
+        // Logout
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await fetch('/api/portal/logout', { method: 'POST' });
+            } catch (err) {}
+            window.location.href = '/hire/portal/login.html';
+        });
+        
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Portal - Hire Katie</title>
+    <link rel="stylesheet" href="/hire/css/hire.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav>
+                <a href="/hire/">HOME</a>
+                <a href="/hire/pricing.html">PRICING</a>
+                <a href="/hire/portal/login.html" class="active">PORTAL</a>
+            </nav>
+        </header>
+
+        <div class="hero">
+            <h1>Client Portal</h1>
+            <p class="lead">View your projects, hours, and download reports.</p>
+        </div>
+
+        <section id="request-link" class="mt-40">
+            <div class="panel">
+                <h2>Login with Email</h2>
+                <p class="muted mb-20">Enter your email to receive a magic login link. No password needed.</p>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="you@example.com">
+                    </div>
+                    <button type="submit" class="btn">Send Login Link</button>
+                </form>
+                
+                <div id="message" class="mt-20" style="display: none;"></div>
+            </div>
+        </section>
+
+        <section id="token-login" class="mt-40" style="display: none;">
+            <div class="panel">
+                <h2>Logging In...</h2>
+                <p class="muted">Verifying your login link.</p>
+                <div id="token-message" class="mt-20"></div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Questions? Email <a href="mailto:blackabee@gmail.com">blackabee@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById('login-form');
+        const message = document.getElementById('message');
+        const requestSection = document.getElementById('request-link');
+        const tokenSection = document.getElementById('token-login');
+        const tokenMessage = document.getElementById('token-message');
+        
+        // Check for token in URL (magic link clicked)
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        
+        if (token) {
+            // Hide request form, show token login
+            requestSection.style.display = 'none';
+            tokenSection.style.display = 'block';
+            
+            // Attempt login with token
+            fetch('/api/portal/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token })
+            })
+            .then(response => response.json().then(data => ({ status: response.status, data })))
+            .then(({ status, data }) => {
+                if (status === 200 && data.success) {
+                    tokenMessage.innerHTML = '<span style="color: var(--green);">Login successful! Redirecting...</span>';
+                    setTimeout(() => {
+                        window.location.href = '/hire/portal/';
+                    }, 1000);
+                } else {
+                    tokenMessage.innerHTML = '<span style="color: var(--red);">' + (data.detail || 'Invalid or expired link. Please request a new one.') + '</span>';
+                    setTimeout(() => {
+                        requestSection.style.display = 'block';
+                        tokenSection.style.display = 'none';
+                    }, 3000);
+                }
+            })
+            .catch(err => {
+                tokenMessage.innerHTML = '<span style="color: var(--red);">Network error. Please try again.</span>';
+            });
+        }
+        
+        // Request magic link form
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const btn = form.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch('/api/portal/request-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                message.style.display = 'block';
+                message.innerHTML = '<span style="color: var(--green);">Check your inbox! A login link has been sent.</span>';
+                form.reset();
+            } catch (err) {
+                message.style.display = 'block';
+                message.innerHTML = '<span style="color: var(--red);">Network error. Please try again.</span>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send Login Link';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Detail - Client Portal - Hire Katie</title>
+    <link rel="stylesheet" href="/hire/css/hire.css">
+    <style>
+        .back-link {
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+        .project-header {
+            margin-bottom: 32px;
+        }
+        .project-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 8px;
+        }
+        .project-repo {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .session-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .session-date {
+            font-weight: 600;
+            color: var(--text-bright);
+        }
+        .session-hours {
+            background: var(--accent);
+            color: var(--bg);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .session-tasks, .session-prs {
+            margin-top: 12px;
+        }
+        .session-tasks h4, .session-prs h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .session-tasks ul, .session-prs ul {
+            list-style: none;
+            padding: 0;
+        }
+        .session-tasks li {
+            padding: 4px 0;
+            color: var(--green);
+        }
+        .session-tasks li:before {
+            content: "// ";
+            color: var(--text-muted);
+        }
+        .session-prs li {
+            padding: 4px 0;
+        }
+        .session-prs a {
+            color: var(--purple);
+        }
+        .session-notes {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        .no-sessions {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav>
+                <a href="/hire/">HOME</a>
+                <a href="/hire/portal/">DASHBOARD</a>
+                <a href="#" id="logout-link">LOGOUT</a>
+            </nav>
+        </header>
+
+        <a href="/hire/portal/" class="back-link">&larr; Back to Dashboard</a>
+
+        <div id="loading" class="loading">
+            Loading project details...
+        </div>
+
+        <div id="project-detail" style="display: none;">
+            <div class="project-header">
+                <h1 class="project-title" id="project-name"></h1>
+                <p class="project-repo"><a id="project-repo" href="#" target="_blank"></a></p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-hours">-</div>
+                    <div class="stat-label">Hours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-tasks">-</div>
+                    <div class="stat-label">Tasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-prs">-</div>
+                    <div class="stat-label">PRs</div>
+                </div>
+            </div>
+
+            <h2>Work Sessions</h2>
+            <div id="sessions-list" class="mt-20">
+                <!-- Sessions loaded dynamically -->
+            </div>
+        </div>
+
+        <div id="error" style="display: none;" class="panel">
+            <h2 style="color: var(--red);">Error</h2>
+            <p id="error-message">Something went wrong.</p>
+            <p><a href="/hire/portal/">Return to dashboard</a></p>
+        </div>
+
+        <footer>
+            <p>Questions? Email <a href="mailto:blackabee@gmail.com">blackabee@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const loading = document.getElementById('loading');
+        const detail = document.getElementById('project-detail');
+        const error = document.getElementById('error');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Get project ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const projectId = params.get('id');
+        
+        if (!projectId) {
+            loading.style.display = 'none';
+            error.style.display = 'block';
+            errorMessage.textContent = 'No project ID provided.';
+        } else {
+            loadProject();
+        }
+        
+        async function loadProject() {
+            try {
+                const response = await fetch('/api/portal/projects/' + projectId);
+                
+                if (response.status === 401) {
+                    window.location.href = '/hire/portal/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    throw new Error('You do not have access to this project.');
+                }
+                
+                if (response.status === 404) {
+                    throw new Error('Project not found.');
+                }
+                
+                const data = await response.json();
+                
+                // Populate header
+                document.getElementById('project-name').textContent = data.project.name;
+                const repoLink = document.getElementById('project-repo');
+                if (data.project.repo_url) {
+                    repoLink.href = data.project.repo_url;
+                    repoLink.textContent = data.project.repo_url;
+                } else {
+                    repoLink.style.display = 'none';
+                }
+                
+                // Populate stats
+                document.getElementById('total-hours').textContent = data.totals.hours.toFixed(1);
+                document.getElementById('total-tasks').textContent = data.totals.tasks;
+                document.getElementById('total-prs').textContent = data.totals.prs;
+                
+                // Render sessions
+                const sessionsList = document.getElementById('sessions-list');
+                sessionsList.innerHTML = '';
+                
+                if (data.sessions.length === 0) {
+                    sessionsList.innerHTML = '<p class="no-sessions">No work sessions yet.</p>';
+                } else {
+                    for (const session of data.sessions) {
+                        const card = document.createElement('div');
+                        card.className = 'session-card';
+                        
+                        let tasksHtml = '';
+                        if (session.tasks_completed && session.tasks_completed.length > 0) {
+                            tasksHtml = `
+                                <div class="session-tasks">
+                                    <h4>Completed</h4>
+                                    <ul>
+                                        ${session.tasks_completed.map(t => '<li>' + escapeHtml(t) + '</li>').join('')}
+                                    </ul>
+                                </div>
+                            `;
+                        }
+                        
+                        let prsHtml = '';
+                        if (session.prs_opened && session.prs_opened.length > 0) {
+                            prsHtml = `
+                                <div class="session-prs">
+                                    <h4>Pull Requests</h4>
+                                    <ul>
+                                        ${session.prs_opened.map(pr => '<li><a href="' + escapeHtml(pr) + '" target="_blank">' + escapeHtml(pr) + '</a></li>').join('')}
+                                    </ul>
+                                </div>
+                            `;
+                        }
+                        
+                        let notesHtml = '';
+                        if (session.notes) {
+                            notesHtml = `<div class="session-notes">${escapeHtml(session.notes)}</div>`;
+                        }
+                        
+                        card.innerHTML = `
+                            <div class="session-header">
+                                <span class="session-date">${session.date || 'Unknown date'}</span>
+                                <span class="session-hours">${session.hours}h</span>
+                            </div>
+                            ${tasksHtml}
+                            ${prsHtml}
+                            ${notesHtml}
+                        `;
+                        
+                        sessionsList.appendChild(card);
+                    }
+                }
+                
+                loading.style.display = 'none';
+                detail.style.display = 'block';
+                
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                errorMessage.textContent = err.message || 'Failed to load project.';
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Logout
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await fetch('/api/portal/logout', { method: 'POST' });
+            } catch (err) {}
+            window.location.href = '/hire/portal/login.html';
+        });
+    </script>
+</body>
+</html>
