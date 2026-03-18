@@ -96,6 +96,28 @@ Server runs at http://localhost:8081
 pytest tests/ -v
 ```
 
+## Management CLI
+
+Send progress updates to clients:
+
+```bash
+# Send weekly updates to all active clients
+python -m src.cli send-updates weekly
+
+# Send monthly summaries
+python -m src.cli send-updates monthly
+```
+
+Schedule with cron for automated delivery:
+
+```bash
+# Every Monday at 9am
+0 9 * * 1 cd /path/to/hire-katie && ./venv/bin/python -m src.cli send-updates weekly
+
+# First of month at 9am
+0 9 1 * * cd /path/to/hire-katie && ./venv/bin/python -m src.cli send-updates monthly
+```
+
 ## Tech Stack
 
 - FastAPI (because Flask is showing its age)

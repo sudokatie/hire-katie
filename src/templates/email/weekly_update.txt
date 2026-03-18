@@ -1,0 +1,16 @@
+Subject: Weekly Progress Update - {period}
+
+Hi {name},
+
+Here's your weekly progress summary for {period}.
+
+{update_body}
+
+---
+
+View full details anytime in your portal:
+https://blackabee.com/hire/portal/
+
+Questions? Just reply to this email.
+
+- Katie
